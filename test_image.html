@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ultra Realistic Face Generator</title>
+	<meta charset="UTF-8">
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+			padding: 20px;
+		}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			background: white;
+			border-radius: 20px;
+			padding: 40px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+		}
+		h1 {
+			text-align: center;
+			color: #333;
+			margin-bottom: 10px;
+			font-size: 32px;
+		}
+		.subtitle {
+			text-align: center;
+			color: #666;
+			margin-bottom: 40px;
+			font-size: 16px;
+		}
+		.upload-section {
+			background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+			border-radius: 15px;
+			padding: 40px;
+			text-align: center;
+			margin-bottom: 30px;
+			border: 3px dashed #667eea;
+		}
+		.file-input-wrapper {
+			position: relative;
+			display: inline-block;
+		}
+		input[type="file"] {
+			display: none;
+		}
+		.file-input-label {
+			background: #667eea;
+			color: white;
+			padding: 15px 40px;
+			border-radius: 10px;
+			cursor: pointer;
+			font-size: 16px;
+			font-weight: 600;
+			display: inline-block;
+			transition: all 0.3s;
+		}
+		.file-input-label:hover {
+			background: #5568d3;
+			transform: translateY(-2px);
+			box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+		}
+		.preview-area {
+			margin-top: 20px;
+		}
+		.preview-area img {
+			max-width: 400px;
+			max-height: 400px;
+			border-radius: 15px;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+		}
+		.styles-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 20px;
+			margin: 30px 0;
+		}
+		.style-card {
+			background: white;
+			border: 3px solid #e0e0e0;
+			border-radius: 15px;
+			padding: 25px;
+			cursor: pointer;
+			transition: all 0.3s;
+			text-align: center;
+		}
+		.style-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+		}
+		.style-card.selected {
+			border-color: #667eea;
+			background: linear-gradient(135deg, #f5f7ff 0%, #e8ecff 100%);
+			box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+		}
+		.style-card input[type="radio"] {
+			display: none;
+		}
+		.style-icon {
+			font-size: 40px;
+			margin-bottom: 15px;
+		}
+		.style-title {
+			font-size: 18px;
+			font-weight: 700;
+			color: #333;
+			margin-bottom: 10px;
+		}
+		.style-description {
+			font-size: 13px;
+			color: #666;
+			line-height: 1.5;
+		}
+		.style-specs {
+			margin-top: 12px;
+			padding-top: 12px;
+			border-top: 1px solid #e0e0e0;
+			font-size: 11px;
+			color: #999;
+		}
+		.generate-btn {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			border: none;
+			padding: 20px 50px;
+			border-radius: 12px;
+			font-size: 20px;
+			font-weight: 700;
+			cursor: pointer;
+			width: 100%;
+			transition: all 0.3s;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+		}
+		.generate-btn:hover {
+			transform: scale(1.02);
+			box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
+		}
+		.generate-btn:active {
+			transform: scale(0.98);
+		}
+		.generate-btn:disabled {
+			background: #ccc;
+			cursor: not-allowed;
+		}
+		.loading {
+			display: none;
+			text-align: center;
+			margin: 40px 0;
+		}
+		.spinner {
+			width: 60px;
+			height: 60px;
+			border: 5px solid #f3f3f3;
+			border-top: 5px solid #667eea;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin: 0 auto 20px;
+		}
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+		.loading-text {
+			font-size: 18px;
+			color: #667eea;
+			font-weight: 600;
+		}
+		.result-section {
+			margin-top: 50px;
+		}
+		.result-section h2 {
+			text-align: center;
+			color: #333;
+			margin-bottom: 30px;
+			font-size: 28px;
+		}
+		.result-image {
+			text-align: center;
+		}
+		.result-image img {
+			max-width: 100%;
+			border-radius: 15px;
+			box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+		}
+		.download-btn {
+			display: inline-block;
+			margin-top: 30px;
+			padding: 15px 40px;
+			background: #28a745;
+			color: white;
+			text-decoration: none;
+			border-radius: 10px;
+			font-weight: 600;
+			transition: all 0.3s;
+		}
+		.download-btn:hover {
+			background: #218838;
+			transform: translateY(-2px);
+			box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+		}
+		.comparison {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 30px;
+			margin-top: 30px;
+		}
+		.comparison-item {
+			text-align: center;
+		}
+		.comparison-item h3 {
+			margin-bottom: 15px;
+			color: #667eea;
+			font-size: 20px;
+		}
+		.comparison-item img {
+			max-width: 100%;
+			border-radius: 15px;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+		}
+		@media (max-width: 768px) {
+			.comparison {
+				grid-template-columns: 1fr;
+			}
+			.styles-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>🎭 Ultra Realistic Face Generator</h1>
+		<p class="subtitle">Tạo ảnh chân dung người thật với độ chi tiết hoàn hảo</p>
+
+		<div class="upload-section">
+			<div class="file-input-wrapper">
+				<input type="file" id="imageInput" accept="image/*" onchange="previewImage()">
+				<label for="imageInput" class="file-input-label">
+					📁 Chọn Ảnh Chân Dung
+				</label>
+			</div>
+			<div id="preview" class="preview-area"></div>
+		</div>
+
+		<div class="styles-grid">
+			<div class="style-card selected" onclick="selectStyle('photorealistic')">
+				<input type="radio" name="style" value="photorealistic" checked>
+				<div class="style-icon">📸</div>
+				<div class="style-title">Photo Realistic</div>
+				<div class="style-description">
+					Siêu thực, giống ảnh chụp thật 100%. Bảo toàn chi tiết khuôn mặt tối đa.
+				</div>
+				<div class="style-specs">
+					Strength: 0.35 | Guidance: 9.5
+				</div>
+			</div>
+
+			<div class="style-card" onclick="selectStyle('professional')">
+				<input type="radio" name="style" value="professional">
+				<div class="style-icon">👔</div>
+				<div class="style-title">Professional</div>
+				<div class="style-description">
+					Chất lượng studio, phù hợp cho ảnh profile chuyên nghiệp.
+				</div>
+				<div class="style-specs">
+					Strength: 0.40 | Guidance: 9.0
+				</div>
+			</div>
+
+			<div class="style-card" onclick="selectStyle('natural')">
+				<input type="radio" name="style" value="natural">
+				<div class="style-icon">🌿</div>
+				<div class="style-title">Natural</div>
+				<div class="style-description">
+					Tự nhiên, không qua chỉnh sửa. Vẻ đẹp chân thực nhất.
+				</div>
+				<div class="style-specs">
+					Strength: 0.45 | Guidance: 8.5
+				</div>
+			</div>
+
+			<div class="style-card" onclick="selectStyle('highend')">
+				<input type="radio" name="style" value="highend">
+				<div class="style-icon">💎</div>
+				<div class="style-title">High-End</div>
+				<div class="style-description">
+					Chất lượng tạp chí, editorial photography cao cấp.
+				</div>
+				<div class="style-specs">
+					Strength: 0.38 | Guidance: 9.2
+				</div>
+			</div>
+
+			<div class="style-card" onclick="selectStyle('ultimate')">
+				<input type="radio" name="style" value="ultimate">
+				<div class="style-icon">⭐</div>
+				<div class="style-title">Ultimate Realism</div>
+				<div class="style-description">
+					Chân thực tuyệt đối. Chi tiết đến từng lỗ chân lông.
+				</div>
+				<div class="style-specs">
+					Strength: 0.32 | Guidance: 10.0
+				</div>
+			</div>
+		</div>
+
+		<button class="generate-btn" onclick="generateVariation()" id="generateBtn">
+			✨ Tạo Ảnh Chân Dung
+		</button>
+
+		<div class="loading" id="loading">
+			<div class="spinner"></div>
+			<p class="loading-text">Đang xử lý ảnh của bạn...</p>
+			<p style="color: #999; margin-top: 10px;">Có thể mất 20-40 giây</p>
+		</div>
+
+		<div id="result" class="result-section" style="display: none;"></div>
+	</div>
+
+	<script>
+		const apiUrl = 'http://localhost:8787';
+		let selectedStyle = 'photorealistic';
+		let originalImageUrl = null;
+
+		function selectStyle(style) {
+			selectedStyle = style;
+			document.querySelectorAll('.style-card').forEach(card => {
+				card.classList.remove('selected');
+			});
+			event.currentTarget.classList.add('selected');
+		}
+
+		function previewImage() {
+			const input = document.getElementById('imageInput');
+			const preview = document.getElementById('preview');
+			
+			if (input.files && input.files[0]) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					originalImageUrl = e.target.result;
+					preview.innerHTML = `
+						<p style="color: #666; margin-bottom: 15px; font-weight: 600;">Ảnh gốc:</p>
+						<img src="${e.target.result}" alt="Original">
+					`;
+				}
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+
+		async function generateVariation() {
+			const input = document.getElementById('imageInput');
+			const loading = document.getElementById('loading');
+			const result = document.getElementById('result');
+			const generateBtn = document.getElementById('generateBtn');
+			
+			if (!input.files[0]) {
+				alert('Vui lòng chọn ảnh trước!');
+				return;
+			}
+
+			loading.style.display = 'block';
+			result.style.display = 'none';
+			generateBtn.disabled = true;
+			generateBtn.textContent = '⏳ Đang xử lý...';
+
+			const formData = new FormData();
+			formData.append('image', input.files[0]);
+			formData.append('type', selectedStyle);
+
+			try {
+				const startTime = Date.now();
+				const response = await fetch(apiUrl, {
+					method: 'POST',
+					body: formData
+				});
+
+				const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
+
+				if (response.ok) {
+					const blob = await response.blob();
+					const imageUrl = URL.createObjectURL(blob);
+					
+					result.innerHTML = `
+						<h2>✨ Kết Quả (${selectedStyle.toUpperCase()})</h2>
+						<p style="text-align: center; color: #666; margin-bottom: 20px;">
+							Thời gian xử lý: ${processingTime} giây
+						</p>
+						<div class="comparison">
+							<div class="comparison-item">
+								<h3>Ảnh Gốc</h3>
+								<img src="${originalImageUrl}" alt="Original">
+							</div>
+							<div class="comparison-item">
+								<h3>Ảnh Đã Tạo</h3>
+								<img src="${imageUrl}" alt="Generated">
+							</div>
+						</div>
+						<div style="text-align: center;">
+							<a href="${imageUrl}" download="face_${selectedStyle}_${Date.now()}.png" class="download-btn">
+								📥 Tải Xuống Ảnh
+							</a>
+						</div>
+					`;
+					result.style.display = 'block';
+				} else {
+					const errorText = await response.text();
+					result.innerHTML = `
+						<div style="text-align: center; color: #dc3545; padding: 40px;">
+							<h2>❌ Lỗi</h2>
+							<p>${errorText}</p>
+						</div>
+					`;
+					result.style.display = 'block';
+				}
+			} catch (error) {
+				result.innerHTML = `
+					<div style="text-align: center; color: #dc3545; padding: 40px;">
+						<h2>❌ Lỗi</h2>
+						<p>${error.message}</p>
+					</div>
+				`;
+				result.style.display = 'block';
+			} finally {
+				loading.style.display = 'none';
+				generateBtn.disabled = false;
+				generateBtn.textContent = '✨ Tạo Ảnh Chân Dung';
+			}
+		}
+	</script>
+</body>
+</html>
