@@ -7,76 +7,97 @@ export default {
 			});
 		}
 
-		// POST request - generate image
+		// POST request - process image-to-image
 		if (request.method === "POST") {
 			try {
 				const formData = await request.formData();
-				const promptType = formData.get("type") || "elegant_portrait";
+				const imageFile = formData.get("image");
+				const styleType = formData.get("style") || "natural_enhance";
 
-				// PROMPT TEMPLATES for realistic social media profile photos
-				const prompts = {
-					elegant_portrait: {
-						prompt: "professional portrait photography of an elegant young asian woman, sophisticated beauty, flowing dark hair, warm genuine smile, designer casual wear, soft beige tones, golden hour lighting, shallow depth of field, photorealistic, high-end fashion photography style, natural skin texture, professional makeup, 8k ultra quality, Instagram worthy",
-						negative_prompt: "cartoon, anime, illustration, painting, 3d render, cgi, fake, doll, mannequin, plastic, artificial, unrealistic, blurry, distorted, deformed, ugly, bad anatomy, extra limbs, text, watermark, signature, low quality"
+				if (!imageFile) {
+					return new Response("No image uploaded", { status: 400 });
+				}
+
+				// Convert uploaded image to array buffer
+				const imageBuffer = await imageFile.arrayBuffer();
+				const imageArray = Array.from(new Uint8Array(imageBuffer));
+
+				// IMPROVED PROMPTS - More natural and realistic
+				const styles = {
+					natural_enhance: {
+						prompt: "professional portrait photo, natural lighting, real person, photorealistic, detailed facial features, natural skin texture, authentic, high quality photography, realistic, lifelike",
+						negative_prompt: "cartoon, anime, illustration, painting, 3d render, cgi, fake, doll, mannequin, plastic face, artificial, unrealistic skin, synthetic, overly smooth, blurry, distorted, deformed, ugly, bad anatomy, extra limbs, mutation, horror",
+						strength: 0.35
 					},
 					
-					fashion_casual: {
-						prompt: "stunning portrait of confident young asian woman, modern fashionista, stylish outfit, trendy accessories, urban chic aesthetic, soft natural makeup, expressive eyes, captivating smile, rooftop setting, sunset glow, professional fashion photography, bokeh background, detailed facial features, flawless skin, 8k resolution, social media ready",
-						negative_prompt: "cartoon, anime, drawn, painted, 3d, cgi, artificial, fake, plastic skin, doll-like, unrealistic, blurry, low quality, distorted, bad proportions, text, watermark"
+					soft_portrait: {
+						prompt: "soft natural portrait photography, real person, gentle lighting, authentic beauty, photorealistic, natural skin, real facial features, professional photo, candid style, lifelike, high quality",
+						negative_prompt: "cartoon, anime, drawn, painted, 3d, cgi, fake, plastic skin, doll-like, artificial, unrealistic, overly edited, blurry, distorted, deformed, bad proportions, mutation",
+						strength: 0.4
 					},
 					
-					lifestyle_influencer: {
-						prompt: "lifestyle portrait of charming young asian woman, influencer aesthetic, natural beauty, minimal makeup, effortless style, cozy sweater, warm coffee tones, cafe ambiance, soft window light, candid moment, authentic expression, professional photography, Instagram aesthetic, natural skin glow, 8k quality, engaging presence",
-						negative_prompt: "cartoon, anime, illustration, 3d render, fake, artificial, plastic, doll, mannequin, unrealistic, blurry, distorted, deformed, bad quality, text, watermark, signature"
+					studio_lighting: {
+						prompt: "professional studio portrait, real person photo, natural makeup, soft lighting setup, authentic features, photorealistic, natural skin texture, real photography, high quality, lifelike appearance",
+						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, plastic, doll face, mannequin, artificial, unrealistic, synthetic skin, overly smooth, blurry, distorted, deformed, bad anatomy",
+						strength: 0.38
 					},
 					
-					beach_goddess: {
-						prompt: "dreamy beach portrait of beautiful young asian woman, beach lifestyle, sun-kissed skin, windswept hair, white summer dress, ocean backdrop, golden hour sunlight, soft ocean breeze mood, natural radiant beauty, vacation vibes, professional travel photography, warm color grading, detailed features, 8k ultra quality, wanderlust aesthetic",
-						negative_prompt: "cartoon, anime, painted, 3d, cgi, fake, plastic, artificial, doll-like, unrealistic, blurry, low quality, distorted, bad anatomy, text, watermark"
+					golden_hour: {
+						prompt: "natural golden hour portrait, real person outdoors, warm sunlight, authentic beauty, photorealistic, natural skin, real facial details, professional outdoor photography, lifelike, genuine expression",
+						negative_prompt: "cartoon, anime, painted, 3d, cgi, fake, artificial, plastic skin, doll-like, unrealistic, synthetic, overly edited, blurry, distorted, deformed, bad quality, mutation",
+						strength: 0.42
 					},
 					
-					urban_chic: {
-						prompt: "sophisticated urban portrait of stylish young asian woman, city girl aesthetic, contemporary fashion, sleek hairstyle, modern makeup, architectural background, golden hour city lights, professional street style photography, confident pose, editorial quality, sharp details, natural skin texture, 8k resolution, metropolitan vibe",
-						negative_prompt: "cartoon, anime, illustration, painted, 3d render, cgi, fake, artificial, plastic skin, doll, unrealistic, blurry, distorted, low quality, text, watermark"
+					casual_outdoor: {
+						prompt: "casual outdoor portrait photo, real person, natural daylight, authentic look, photorealistic, natural skin texture, real features, candid photography style, lifelike, professional quality",
+						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, plastic face, doll, mannequin, artificial skin, unrealistic, overly processed, blurry, distorted, deformed, bad anatomy",
+						strength: 0.4
 					},
 					
-					fitness_active: {
-						prompt: "energetic portrait of athletic young asian woman, fitness lifestyle, active wear, healthy glow, toned physique, confident smile, outdoor gym setting, morning sunlight, motivational atmosphere, professional sports photography, dynamic composition, natural beauty, detailed skin, 8k quality, wellness aesthetic",
-						negative_prompt: "cartoon, anime, drawn, 3d, cgi, fake, plastic, artificial, doll-like, unrealistic, blurry, distorted, deformed, bad anatomy, text, watermark, low quality"
+					soft_beauty: {
+						prompt: "soft beauty portrait, real person photograph, gentle natural light, authentic features, photorealistic skin, natural makeup, real facial details, professional portrait, lifelike, high quality photo",
+						negative_prompt: "cartoon, anime, drawn, painted, 3d, cgi, fake, plastic, doll-like, artificial, unrealistic skin, synthetic, overly smooth, blurry, distorted, deformed, mutation, bad proportions",
+						strength: 0.36
 					},
 					
-					vintage_glam: {
-						prompt: "glamorous vintage portrait of elegant young asian woman, retro Hollywood style, classic beauty, timeless makeup, vintage fashion, sophisticated pose, soft studio lighting, film photography aesthetic, romantic mood, professional headshot, flawless complexion, detailed eyes, 8k ultra quality, old Hollywood charm",
-						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, plastic, doll, mannequin, artificial, unrealistic, blurry, distorted, bad quality, text, watermark"
+					natural_light: {
+						prompt: "natural window light portrait, real person photo, soft diffused lighting, authentic beauty, photorealistic, natural skin, real features, professional indoor photography, lifelike, genuine",
+						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, artificial, plastic skin, doll face, mannequin, unrealistic, synthetic, overly edited, blurry, distorted, deformed, bad quality",
+						strength: 0.38
 					},
 					
-					bohemian_free: {
-						prompt: "ethereal bohemian portrait of free-spirited young asian woman, boho chic style, natural flowing hair, flower crown, earthy tones, outdoor nature setting, soft diffused light, dreamy atmosphere, artistic photography, authentic expression, natural beauty, detailed features, 8k resolution, carefree aesthetic",
-						negative_prompt: "cartoon, anime, painted, 3d, cgi, fake, artificial, plastic, doll-like, unrealistic, blurry, low quality, distorted, deformed, text, watermark"
+					warm_tones: {
+						prompt: "warm tone portrait photography, real person, natural color grading, authentic look, photorealistic, natural skin texture, real facial features, professional photo, lifelike, high quality",
+						negative_prompt: "cartoon, anime, painted, 3d, cgi, fake, plastic, doll-like, artificial skin, unrealistic, synthetic, overly processed, blurry, distorted, deformed, bad anatomy, mutation",
+						strength: 0.4
 					},
 					
-					luxury_elegance: {
-						prompt: "luxurious portrait of sophisticated young asian woman, high-end fashion, designer clothing, elegant jewelry, refined makeup, upscale ambiance, professional lighting, editorial photography style, confident posture, premium quality, flawless skin, sharp details, 8k ultra resolution, luxury brand aesthetic",
-						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, plastic, doll, artificial, unrealistic, blurry, distorted, bad quality, cheap look, text, watermark"
+					fresh_outdoor: {
+						prompt: "fresh outdoor portrait, real person photograph, natural environment, authentic appearance, photorealistic, natural skin, real details, professional outdoor photo, lifelike, genuine expression",
+						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, artificial, plastic face, doll, mannequin, unrealistic skin, synthetic, overly smooth, blurry, distorted, deformed, bad quality",
+						strength: 0.42
 					},
 					
-					natural_beauty: {
-						prompt: "pure natural portrait of beautiful young asian woman, minimal makeup, authentic beauty, genuine smile, casual comfortable outfit, outdoor natural setting, soft daylight, organic mood, real moment captured, professional portrait photography, healthy skin glow, detailed facial features, 8k quality, girl-next-door charm",
-						negative_prompt: "cartoon, anime, drawn, painted, 3d, cgi, fake, artificial, plastic skin, doll, mannequin, unrealistic, blurry, distorted, low quality, text, watermark"
+					clean_portrait: {
+						prompt: "clean professional portrait, real person photo, balanced lighting, authentic features, photorealistic, natural skin texture, real facial details, high quality photography, lifelike, professional",
+						negative_prompt: "cartoon, anime, drawn, painted, 3d, cgi, fake, plastic skin, doll-like, artificial, unrealistic, synthetic, overly edited, blurry, distorted, deformed, bad anatomy, mutation, horror",
+						strength: 0.35
 					}
 				};
 
-				const selectedPrompt = prompts[promptType] || prompts.elegant_portrait;
+				const selectedStyle = styles[styleType] || styles.natural_enhance;
 
 				const inputs = {
-					prompt: selectedPrompt.prompt,
-					negative_prompt: selectedPrompt.negative_prompt,
+					prompt: selectedStyle.prompt,
+					negative_prompt: selectedStyle.negative_prompt,
+					image: imageArray,
+					strength: selectedStyle.strength,
 					num_steps: 20,
-					guidance: 7.5,
+					guidance: 6.5,
 				};
 
 				const response = await env.AI.run(
-					"@cf/stabilityai/stable-diffusion-xl-base-1.0",
+					"@cf/runwayml/stable-diffusion-v1-5-img2img",
 					inputs
 				);
 
@@ -100,7 +121,8 @@ const HTML_FORM = `<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>AI Profile Photo Generator</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AI Natural Photo Enhancer</title>
 	<style>
 		* {
 			margin: 0;
@@ -108,13 +130,13 @@ const HTML_FORM = `<!DOCTYPE html>
 			box-sizing: border-box;
 		}
 		body {
-			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 			min-height: 100vh;
 			padding: 20px;
 		}
 		.container {
-			max-width: 1200px;
+			max-width: 1400px;
 			margin: 0 auto;
 			background: white;
 			border-radius: 20px;
@@ -124,77 +146,180 @@ const HTML_FORM = `<!DOCTYPE html>
 		h1 {
 			text-align: center;
 			color: #333;
-			margin-bottom: 15px;
-			font-size: 32px;
+			margin-bottom: 10px;
+			font-size: 36px;
 		}
 		.subtitle {
 			text-align: center;
 			color: #666;
 			margin-bottom: 40px;
+			font-size: 16px;
 		}
-		.options-grid {
+		
+		/* Upload Section */
+		.upload-section {
+			background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+			border-radius: 15px;
+			padding: 40px;
+			margin-bottom: 40px;
+			text-align: center;
+		}
+		.upload-area {
+			border: 3px dashed #667eea;
+			border-radius: 15px;
+			padding: 60px 20px;
+			background: white;
+			cursor: pointer;
+			transition: all 0.3s;
+		}
+		.upload-area:hover {
+			border-color: #764ba2;
+			background: #f8f9ff;
+			transform: scale(1.02);
+		}
+		.upload-area.dragover {
+			border-color: #764ba2;
+			background: #e8ecff;
+		}
+		.upload-icon {
+			font-size: 80px;
+			margin-bottom: 20px;
+		}
+		.upload-text {
+			font-size: 20px;
+			color: #333;
+			font-weight: 600;
+			margin-bottom: 10px;
+		}
+		.upload-hint {
+			color: #999;
+			font-size: 14px;
+		}
+		#fileInput {
+			display: none;
+		}
+		
+		/* Preview Section */
+		.preview-section {
+			display: none;
+			margin-bottom: 40px;
+		}
+		.preview-container {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-			gap: 20px;
+			grid-template-columns: 1fr 1fr;
+			gap: 30px;
 			margin-bottom: 30px;
 		}
-		.option-card {
+		.preview-box {
+			background: #f8f9fa;
+			border-radius: 15px;
+			padding: 20px;
+			text-align: center;
+		}
+		.preview-label {
+			font-size: 18px;
+			font-weight: 700;
+			color: #333;
+			margin-bottom: 15px;
+		}
+		.preview-box img {
+			max-width: 100%;
+			max-height: 500px;
+			border-radius: 10px;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+		}
+		
+		/* Style Selection */
+		.style-section {
+			margin-bottom: 30px;
+		}
+		.style-title {
+			font-size: 24px;
+			font-weight: 700;
+			color: #333;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+		.styles-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 15px;
+			margin-bottom: 30px;
+		}
+		.style-card {
 			background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 			border: 3px solid transparent;
-			border-radius: 15px;
-			padding: 25px;
+			border-radius: 12px;
+			padding: 20px;
 			cursor: pointer;
 			transition: all 0.3s;
 			text-align: center;
 		}
-		.option-card:hover {
+		.style-card:hover {
 			transform: translateY(-5px);
-			box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+			box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 		}
-		.option-card.selected {
+		.style-card.selected {
 			border-color: #667eea;
 			background: linear-gradient(135deg, #e8ecff 0%, #d5dcff 100%);
 			box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
 		}
-		.option-icon {
-			font-size: 50px;
-			margin-bottom: 15px;
+		.style-icon {
+			font-size: 40px;
+			margin-bottom: 10px;
 		}
-		.option-title {
-			font-size: 16px;
+		.style-name {
+			font-size: 14px;
 			font-weight: 700;
 			color: #333;
-			margin-bottom: 8px;
+			margin-bottom: 5px;
 		}
-		.option-desc {
-			font-size: 12px;
+		.style-desc {
+			font-size: 11px;
 			color: #666;
-			line-height: 1.4;
 		}
-		.generate-btn {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-			color: white;
+		
+		/* Buttons */
+		.btn-group {
+			display: flex;
+			gap: 15px;
+			margin-bottom: 20px;
+		}
+		.btn {
+			flex: 1;
+			padding: 18px;
 			border: none;
-			padding: 20px 50px;
 			border-radius: 12px;
-			font-size: 20px;
+			font-size: 18px;
 			font-weight: 700;
 			cursor: pointer;
-			width: 100%;
 			transition: all 0.3s;
 		}
-		.generate-btn:hover {
+		.btn-primary {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+		}
+		.btn-primary:hover:not(:disabled) {
 			transform: scale(1.02);
 			box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
 		}
-		.generate-btn:disabled {
+		.btn-primary:disabled {
 			background: #ccc;
 			cursor: not-allowed;
 		}
+		.btn-secondary {
+			background: #6c757d;
+			color: white;
+		}
+		.btn-secondary:hover {
+			background: #5a6268;
+		}
+		
+		/* Loading */
 		.loading {
 			display: none;
 			text-align: center;
-			margin: 40px 0;
+			padding: 40px;
 		}
 		.spinner {
 			width: 60px;
@@ -209,16 +334,48 @@ const HTML_FORM = `<!DOCTYPE html>
 			0% { transform: rotate(0deg); }
 			100% { transform: rotate(360deg); }
 		}
-		.result {
-			margin-top: 40px;
+		.loading-text {
+			color: #667eea;
+			font-weight: 600;
+			font-size: 18px;
+		}
+		
+		/* Gallery */
+		.gallery {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+			gap: 20px;
+			margin-top: 30px;
+		}
+		.gallery-item {
+			position: relative;
+			border-radius: 10px;
+			overflow: hidden;
+			cursor: pointer;
+			transition: transform 0.3s;
+			box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+		}
+		.gallery-item:hover {
+			transform: scale(1.05);
+			box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+		}
+		.gallery-item img {
+			width: 100%;
+			display: block;
+		}
+		.gallery-label {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: rgba(0,0,0,0.7);
+			color: white;
+			padding: 10px;
+			font-size: 12px;
 			text-align: center;
 		}
-		.result img {
-			max-width: 100%;
-			border-radius: 15px;
-			box-shadow: 0 15px 50px rgba(0,0,0,0.3);
-			margin-bottom: 20px;
-		}
+		
+		/* Download Button */
 		.download-btn {
 			display: inline-block;
 			padding: 15px 40px;
@@ -228,134 +385,234 @@ const HTML_FORM = `<!DOCTYPE html>
 			border-radius: 10px;
 			font-weight: 600;
 			transition: all 0.3s;
+			margin-top: 20px;
 		}
 		.download-btn:hover {
 			background: #218838;
 			transform: translateY(-2px);
 		}
-		.gallery {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-			gap: 15px;
-			margin-top: 20px;
-		}
-		.gallery img {
-			width: 100%;
+		
+		.info-box {
+			background: #fff3cd;
+			border: 2px solid #ffc107;
 			border-radius: 10px;
-			cursor: pointer;
-			transition: transform 0.3s;
+			padding: 15px;
+			margin-bottom: 30px;
+			text-align: center;
 		}
-		.gallery img:hover {
-			transform: scale(1.05);
+		.info-box strong {
+			color: #856404;
+		}
+		
+		@media (max-width: 768px) {
+			.preview-container {
+				grid-template-columns: 1fr;
+			}
+			.btn-group {
+				flex-direction: column;
+			}
 		}
 	</style>
 </head>
 <body>
 	<div class="container">
-		<h1>✨ AI Profile Photo Generator</h1>
-		<p class="subtitle">Choose your style for stunning social media profile photos</p>
+		<h1>📸 AI Natural Photo Enhancer</h1>
+		<p class="subtitle">Upload your photo and enhance it naturally - keeping your real facial features</p>
 
-		<div class="options-grid">
-			<div class="option-card selected" onclick="selectType('elegant_portrait')">
-				<div class="option-icon">👑</div>
-				<div class="option-title">Elegant Portrait</div>
-				<div class="option-desc">Sophisticated & classy</div>
+		<!-- Upload Section -->
+		<div class="upload-section">
+			<div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+				<div class="upload-icon">📤</div>
+				<div class="upload-text">Click to Upload Your Photo</div>
+				<div class="upload-hint">or drag and drop your image here</div>
+				<div class="upload-hint" style="margin-top: 10px;">Supports: JPG, PNG, WebP (Max 5MB)</div>
+			</div>
+			<input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+		</div>
+
+		<!-- Preview Section -->
+		<div class="preview-section" id="previewSection">
+			<div class="info-box">
+				<strong>💡 Tip:</strong> These styles enhance your photo naturally while preserving your facial features and natural look
 			</div>
 
-			<div class="option-card" onclick="selectType('fashion_casual')">
-				<div class="option-icon">👗</div>
-				<div class="option-title">Fashion Casual</div>
-				<div class="option-desc">Trendy & stylish</div>
+			<div class="preview-container">
+				<div class="preview-box">
+					<div class="preview-label">📷 Original Photo</div>
+					<img id="originalImage" src="" alt="Original">
+				</div>
+				<div class="preview-box">
+					<div class="preview-label">✨ Enhanced Result</div>
+					<img id="resultImage" src="" alt="Result" style="display: none;">
+					<div id="resultPlaceholder" style="padding: 100px 20px; color: #999;">
+						Select a natural enhancement style below and click "Enhance Photo"
+					</div>
+				</div>
 			</div>
 
-			<div class="option-card" onclick="selectType('lifestyle_influencer')">
-				<div class="option-icon">📸</div>
-				<div class="option-title">Lifestyle Influencer</div>
-				<div class="option-desc">Instagram aesthetic</div>
+			<!-- Style Selection -->
+			<div class="style-section">
+				<div class="style-title">🎨 Choose Natural Enhancement Style</div>
+				<div class="styles-grid">
+					<div class="style-card selected" onclick="selectStyle('natural_enhance')">
+						<div class="style-icon">✨</div>
+						<div class="style-name">Natural Enhance</div>
+						<div class="style-desc">Subtle improvement</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('soft_portrait')">
+						<div class="style-icon">🌸</div>
+						<div class="style-name">Soft Portrait</div>
+						<div class="style-desc">Gentle & natural</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('studio_lighting')">
+						<div class="style-icon">💡</div>
+						<div class="style-name">Studio Lighting</div>
+						<div class="style-desc">Professional light</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('golden_hour')">
+						<div class="style-icon">🌅</div>
+						<div class="style-name">Golden Hour</div>
+						<div class="style-desc">Warm sunlight</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('casual_outdoor')">
+						<div class="style-icon">🏞️</div>
+						<div class="style-name">Casual Outdoor</div>
+						<div class="style-desc">Natural daylight</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('soft_beauty')">
+						<div class="style-icon">🌺</div>
+						<div class="style-name">Soft Beauty</div>
+						<div class="style-desc">Gentle enhancement</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('natural_light')">
+						<div class="style-icon">🪟</div>
+						<div class="style-name">Natural Light</div>
+						<div class="style-desc">Window lighting</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('warm_tones')">
+						<div class="style-icon">🧡</div>
+						<div class="style-name">Warm Tones</div>
+						<div class="style-desc">Cozy atmosphere</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('fresh_outdoor')">
+						<div class="style-icon">🌿</div>
+						<div class="style-name">Fresh Outdoor</div>
+						<div class="style-desc">Natural environment</div>
+					</div>
+					<div class="style-card" onclick="selectStyle('clean_portrait')">
+						<div class="style-icon">📸</div>
+						<div class="style-name">Clean Portrait</div>
+						<div class="style-desc">Balanced & clear</div>
+					</div>
+				</div>
 			</div>
 
-			<div class="option-card" onclick="selectType('beach_goddess')">
-				<div class="option-icon">🌊</div>
-				<div class="option-title">Beach Goddess</div>
-				<div class="option-desc">Summer vacation vibes</div>
-			</div>
-
-			<div class="option-card" onclick="selectType('urban_chic')">
-				<div class="option-icon">🌆</div>
-				<div class="option-title">Urban Chic</div>
-				<div class="option-desc">City lifestyle</div>
-			</div>
-
-			<div class="option-card" onclick="selectType('fitness_active')">
-				<div class="option-icon">💪</div>
-				<div class="option-title">Fitness Active</div>
-				<div class="option-desc">Healthy & energetic</div>
-			</div>
-
-			<div class="option-card" onclick="selectType('vintage_glam')">
-				<div class="option-icon">🎬</div>
-				<div class="option-title">Vintage Glam</div>
-				<div class="option-desc">Old Hollywood style</div>
-			</div>
-
-			<div class="option-card" onclick="selectType('bohemian_free')">
-				<div class="option-icon">🌸</div>
-				<div class="option-title">Bohemian Free</div>
-				<div class="option-desc">Natural & artistic</div>
-			</div>
-
-			<div class="option-card" onclick="selectType('luxury_elegance')">
-				<div class="option-icon">💎</div>
-				<div class="option-title">Luxury Elegance</div>
-				<div class="option-desc">High-end & premium</div>
-			</div>
-
-			<div class="option-card" onclick="selectType('natural_beauty')">
-				<div class="option-icon">🌿</div>
-				<div class="option-title">Natural Beauty</div>
-				<div class="option-desc">Authentic & pure</div>
+			<!-- Action Buttons -->
+			<div class="btn-group">
+				<button class="btn btn-primary" id="transformBtn" onclick="transformImage()">
+					✨ Enhance Photo Naturally
+				</button>
+				<button class="btn btn-secondary" onclick="resetUpload()">
+					🔄 Upload Different Photo
+				</button>
 			</div>
 		</div>
 
-		<button class="generate-btn" onclick="generateImage()" id="generateBtn">
-			✨ Generate Photo
-		</button>
-
+		<!-- Loading -->
 		<div class="loading" id="loading">
 			<div class="spinner"></div>
-			<p style="color: #667eea; font-weight: 600; font-size: 18px;">Creating your photo...</p>
-			<p style="color: #999; margin-top: 10px;">Please wait 10-20 seconds</p>
+			<div class="loading-text">Enhancing your photo naturally...</div>
+			<div style="color: #999; margin-top: 10px;">Preserving your facial features | Please wait 15-30 seconds</div>
 		</div>
 
-		<div id="result" class="result"></div>
-
+		<!-- Gallery -->
 		<div id="gallery" class="gallery"></div>
 	</div>
 
 	<script>
-		let selectedType = 'elegant_portrait';
-		let generatedImages = [];
+		let uploadedFile = null;
+		let selectedStyle = 'natural_enhance';
+		let galleryImages = [];
 
-		function selectType(type) {
-			selectedType = type;
-			document.querySelectorAll('.option-card').forEach(card => {
+		const uploadArea = document.getElementById('uploadArea');
+		const fileInput = document.getElementById('fileInput');
+
+		// Drag and drop handlers
+		uploadArea.addEventListener('dragover', (e) => {
+			e.preventDefault();
+			uploadArea.classList.add('dragover');
+		});
+
+		uploadArea.addEventListener('dragleave', () => {
+			uploadArea.classList.remove('dragover');
+		});
+
+		uploadArea.addEventListener('drop', (e) => {
+			e.preventDefault();
+			uploadArea.classList.remove('dragover');
+			const files = e.dataTransfer.files;
+			if (files.length > 0) {
+				handleFile(files[0]);
+			}
+		});
+
+		function handleFileSelect(event) {
+			const file = event.target.files[0];
+			if (file) {
+				handleFile(file);
+			}
+		}
+
+		function handleFile(file) {
+			// Validate file
+			if (!file.type.startsWith('image/')) {
+				alert('Please upload an image file');
+				return;
+			}
+			if (file.size > 5 * 1024 * 1024) {
+				alert('File size must be less than 5MB');
+				return;
+			}
+
+			uploadedFile = file;
+
+			// Show preview
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				document.getElementById('originalImage').src = e.target.result;
+				document.getElementById('previewSection').style.display = 'block';
+				document.querySelector('.upload-section').style.display = 'none';
+			};
+			reader.readAsDataURL(file);
+		}
+
+		function selectStyle(style) {
+			selectedStyle = style;
+			document.querySelectorAll('.style-card').forEach(card => {
 				card.classList.remove('selected');
 			});
 			event.currentTarget.classList.add('selected');
 		}
 
-		async function generateImage() {
+		async function transformImage() {
+			if (!uploadedFile) {
+				alert('Please upload an image first');
+				return;
+			}
+
 			const loading = document.getElementById('loading');
-			const result = document.getElementById('result');
-			const generateBtn = document.getElementById('generateBtn');
+			const transformBtn = document.getElementById('transformBtn');
+			const resultImage = document.getElementById('resultImage');
+			const resultPlaceholder = document.getElementById('resultPlaceholder');
 
 			loading.style.display = 'block';
-			result.innerHTML = '';
-			generateBtn.disabled = true;
-			generateBtn.textContent = '⏳ Creating...';
+			transformBtn.disabled = true;
+			resultImage.style.display = 'none';
+			resultPlaceholder.style.display = 'block';
 
 			const formData = new FormData();
-			formData.append('type', selectedType);
+			formData.append('image', uploadedFile);
+			formData.append('style', selectedStyle);
 
 			try {
 				const startTime = Date.now();
@@ -369,61 +626,69 @@ const HTML_FORM = `<!DOCTYPE html>
 				if (response.ok) {
 					const blob = await response.blob();
 					const imageUrl = URL.createObjectURL(blob);
-					
-					generatedImages.unshift(imageUrl);
-					
-					result.innerHTML = \`
-						<h2 style="color: #333; margin-bottom: 20px;">✨ Your Photo is Ready!</h2>
-						<p style="color: #666; margin-bottom: 20px;">Processing time: \${processingTime}s</p>
-						<img src="\${imageUrl}" alt="Generated Profile Photo">
-						<br><br>
-						<a href="\${imageUrl}" download="profile_\${selectedType}_\${Date.now()}.png" class="download-btn">
-							📥 Download Photo
+
+					resultImage.src = imageUrl;
+					resultImage.style.display = 'block';
+					resultPlaceholder.style.display = 'none';
+
+					// Add to gallery
+					galleryImages.unshift({
+						url: imageUrl,
+						style: selectedStyle,
+						time: processingTime
+					});
+					updateGallery();
+
+					// Show download button
+					const downloadSection = document.createElement('div');
+					downloadSection.style.textAlign = 'center';
+					downloadSection.innerHTML = \`
+						<a href="\${imageUrl}" download="enhanced_\${selectedStyle}_\${Date.now()}.png" class="download-btn">
+							📥 Download Enhanced Photo
 						</a>
 					\`;
+					resultPlaceholder.innerHTML = '';
+					resultPlaceholder.appendChild(downloadSection);
+					resultPlaceholder.style.display = 'block';
 
-					updateGallery();
 				} else {
-					result.innerHTML = \`
-						<div style="color: #dc3545; padding: 20px;">
-							<h2>❌ Error</h2>
-							<p>\${await response.text()}</p>
-						</div>
-					\`;
+					alert('Error: ' + await response.text());
 				}
 			} catch (error) {
-				result.innerHTML = \`
-					<div style="color: #dc3545; padding: 20px;">
-						<h2>❌ Error</h2>
-						<p>\${error.message}</p>
-					</div>
-				\`;
+				alert('Error: ' + error.message);
 			} finally {
 				loading.style.display = 'none';
-				generateBtn.disabled = false;
-				generateBtn.textContent = '✨ Generate Photo';
+				transformBtn.disabled = false;
 			}
 		}
 
 		function updateGallery() {
 			const gallery = document.getElementById('gallery');
-			if (generatedImages.length > 0) {
-				gallery.innerHTML = '<h3 style="grid-column: 1/-1; color: #333;">Your Gallery:</h3>' +
-					generatedImages.map(url => \`<img src="\${url}" onclick="viewImage('\${url}')">\`).join('');
+			if (galleryImages.length > 0) {
+				gallery.innerHTML = '<h3 style="grid-column: 1/-1; color: #333; text-align: center; margin-bottom: 10px;">📁 Your Enhanced Photos</h3>' +
+					galleryImages.map(img => \`
+					<div class="gallery-item" onclick="viewGalleryImage('\${img.url}')">
+						<img src="\${img.url}" alt="\${img.style}">
+						<div class="gallery-label">\${img.style.replace(/_/g, ' ')} (\${img.time}s)</div>
+					</div>
+				\`).join('');
 			}
 		}
 
-		function viewImage(url) {
-			const result = document.getElementById('result');
-			result.innerHTML = \`
-				<h2 style="color: #333; margin-bottom: 20px;">👁️ View Photo</h2>
-				<img src="\${url}" alt="View">
-				<br><br>
-				<a href="\${url}" download="image.png" class="download-btn">
-					📥 Download Photo
-				</a>
-			\`;
-			result.scrollIntoView({ behavior: 'smooth' });
+		function viewGalleryImage(url) {
+			document.getElementById('resultImage').src = url;
+			document.getElementById('resultImage').style.display = 'block';
+			document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+		}
+
+		function resetUpload() {
+			uploadedFile = null;
+			document.getElementById('previewSection').style.display = 'none';
+			document.querySelector('.upload-section').style.display = 'block';
+			document.getElementById('fileInput').value = '';
+			document.getElementById('resultImage').style.display = 'none';
+			document.getElementById('resultPlaceholder').innerHTML = 'Select a natural enhancement style below and click "Enhance Photo"';
+			document.getElementById('resultPlaceholder').style.display = 'block';
 		}
 	</script>
 </body>
