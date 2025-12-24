@@ -1,6 +1,6 @@
 export default {
 	async fetch(request, env) {
-		// GET request - trả về HTML form
+		// GET request - return HTML form
 		if (request.method === "GET") {
 			return new Response(HTML_FORM, {
 				headers: { "content-type": "text/html;charset=UTF-8" }
@@ -11,37 +11,62 @@ export default {
 		if (request.method === "POST") {
 			try {
 				const formData = await request.formData();
-				const promptType = formData.get("type") || "woman";
+				const promptType = formData.get("type") || "elegant_portrait";
 
-				// PROMPT TEMPLATES cho ảnh người thật
+				// PROMPT TEMPLATES for realistic social media profile photos
 				const prompts = {
-					woman: {
-						prompt: "photo portrait of a beautiful young asian woman, natural beauty, black hair, brown eyes, friendly smile, casual outfit, outdoor cafe setting, natural daylight, soft lighting, photorealistic, real person, candid photography, authentic, lifelike, detailed face, natural skin, professional photo, 8k, high quality",
-						negative_prompt: "cartoon, anime, illustration, painting, 3d render, cgi, fake, doll, mannequin, plastic, artificial, unrealistic, blurry, distorted, deformed, ugly, bad anatomy, extra limbs, text, watermark, signature"
+					elegant_portrait: {
+						prompt: "professional portrait photography of an elegant young asian woman, sophisticated beauty, flowing dark hair, warm genuine smile, designer casual wear, soft beige tones, golden hour lighting, shallow depth of field, photorealistic, high-end fashion photography style, natural skin texture, professional makeup, 8k ultra quality, Instagram worthy",
+						negative_prompt: "cartoon, anime, illustration, painting, 3d render, cgi, fake, doll, mannequin, plastic, artificial, unrealistic, blurry, distorted, deformed, ugly, bad anatomy, extra limbs, text, watermark, signature, low quality"
 					},
-					man: {
-						prompt: "photo portrait of a handsome young asian man, natural look, short black hair, confident expression, casual shirt, outdoor setting, natural daylight, soft lighting, photorealistic, real person, candid photography, authentic, lifelike, detailed face, natural skin, professional photo, 8k, high quality",
-						negative_prompt: "cartoon, anime, illustration, painting, 3d render, cgi, fake, doll, mannequin, plastic, artificial, unrealistic, blurry, distorted, deformed, ugly, bad anatomy, extra limbs, text, watermark, signature"
+					
+					fashion_casual: {
+						prompt: "stunning portrait of confident young asian woman, modern fashionista, stylish outfit, trendy accessories, urban chic aesthetic, soft natural makeup, expressive eyes, captivating smile, rooftop setting, sunset glow, professional fashion photography, bokeh background, detailed facial features, flawless skin, 8k resolution, social media ready",
+						negative_prompt: "cartoon, anime, drawn, painted, 3d, cgi, artificial, fake, plastic skin, doll-like, unrealistic, blurry, low quality, distorted, bad proportions, text, watermark"
 					},
-					professional_woman: {
-						prompt: "professional headshot photo of asian businesswoman, elegant appearance, professional attire, natural makeup, confident smile, studio lighting, white background, corporate portrait, photorealistic, real person, detailed facial features, natural skin texture, high quality photography, 8k resolution",
-						negative_prompt: "cartoon, anime, illustration, 3d, cgi, fake, plastic, doll, unrealistic, blurry, distorted, deformed, bad quality, text, watermark"
+					
+					lifestyle_influencer: {
+						prompt: "lifestyle portrait of charming young asian woman, influencer aesthetic, natural beauty, minimal makeup, effortless style, cozy sweater, warm coffee tones, cafe ambiance, soft window light, candid moment, authentic expression, professional photography, Instagram aesthetic, natural skin glow, 8k quality, engaging presence",
+						negative_prompt: "cartoon, anime, illustration, 3d render, fake, artificial, plastic, doll, mannequin, unrealistic, blurry, distorted, deformed, bad quality, text, watermark, signature"
 					},
-					professional_man: {
-						prompt: "professional headshot photo of asian businessman, clean appearance, business suit, confident expression, studio lighting, white background, corporate portrait, photorealistic, real person, detailed facial features, natural skin texture, high quality photography, 8k resolution",
-						negative_prompt: "cartoon, anime, illustration, 3d, cgi, fake, plastic, doll, unrealistic, blurry, distorted, deformed, bad quality, text, watermark"
+					
+					beach_goddess: {
+						prompt: "dreamy beach portrait of beautiful young asian woman, beach lifestyle, sun-kissed skin, windswept hair, white summer dress, ocean backdrop, golden hour sunlight, soft ocean breeze mood, natural radiant beauty, vacation vibes, professional travel photography, warm color grading, detailed features, 8k ultra quality, wanderlust aesthetic",
+						negative_prompt: "cartoon, anime, painted, 3d, cgi, fake, plastic, artificial, doll-like, unrealistic, blurry, low quality, distorted, bad anatomy, text, watermark"
 					},
-					casual_woman: {
-						prompt: "casual photo of young asian woman, natural beauty, long dark hair, genuine smile, coffee shop background, morning light through window, wearing casual clothes, photorealistic, authentic moment, real person photograph, natural expression, soft focus background, professional photography, 8k quality",
-						negative_prompt: "cartoon, anime, drawn, painted, 3d render, artificial, fake, doll-like, plastic skin, unrealistic, blurry, low quality, distorted, deformed, text, watermark"
+					
+					urban_chic: {
+						prompt: "sophisticated urban portrait of stylish young asian woman, city girl aesthetic, contemporary fashion, sleek hairstyle, modern makeup, architectural background, golden hour city lights, professional street style photography, confident pose, editorial quality, sharp details, natural skin texture, 8k resolution, metropolitan vibe",
+						negative_prompt: "cartoon, anime, illustration, painted, 3d render, cgi, fake, artificial, plastic skin, doll, unrealistic, blurry, distorted, low quality, text, watermark"
 					},
-					casual_man: {
-						prompt: "casual photo of young asian man, natural appearance, styled hair, relaxed smile, urban cafe background, natural window lighting, wearing casual shirt, photorealistic, authentic moment, real person photograph, natural expression, soft focus background, professional photography, 8k quality",
-						negative_prompt: "cartoon, anime, drawn, painted, 3d render, artificial, fake, doll-like, plastic skin, unrealistic, blurry, low quality, distorted, deformed, text, watermark"
+					
+					fitness_active: {
+						prompt: "energetic portrait of athletic young asian woman, fitness lifestyle, active wear, healthy glow, toned physique, confident smile, outdoor gym setting, morning sunlight, motivational atmosphere, professional sports photography, dynamic composition, natural beauty, detailed skin, 8k quality, wellness aesthetic",
+						negative_prompt: "cartoon, anime, drawn, 3d, cgi, fake, plastic, artificial, doll-like, unrealistic, blurry, distorted, deformed, bad anatomy, text, watermark, low quality"
+					},
+					
+					vintage_glam: {
+						prompt: "glamorous vintage portrait of elegant young asian woman, retro Hollywood style, classic beauty, timeless makeup, vintage fashion, sophisticated pose, soft studio lighting, film photography aesthetic, romantic mood, professional headshot, flawless complexion, detailed eyes, 8k ultra quality, old Hollywood charm",
+						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, plastic, doll, mannequin, artificial, unrealistic, blurry, distorted, bad quality, text, watermark"
+					},
+					
+					bohemian_free: {
+						prompt: "ethereal bohemian portrait of free-spirited young asian woman, boho chic style, natural flowing hair, flower crown, earthy tones, outdoor nature setting, soft diffused light, dreamy atmosphere, artistic photography, authentic expression, natural beauty, detailed features, 8k resolution, carefree aesthetic",
+						negative_prompt: "cartoon, anime, painted, 3d, cgi, fake, artificial, plastic, doll-like, unrealistic, blurry, low quality, distorted, deformed, text, watermark"
+					},
+					
+					luxury_elegance: {
+						prompt: "luxurious portrait of sophisticated young asian woman, high-end fashion, designer clothing, elegant jewelry, refined makeup, upscale ambiance, professional lighting, editorial photography style, confident posture, premium quality, flawless skin, sharp details, 8k ultra resolution, luxury brand aesthetic",
+						negative_prompt: "cartoon, anime, illustration, 3d render, cgi, fake, plastic, doll, artificial, unrealistic, blurry, distorted, bad quality, cheap look, text, watermark"
+					},
+					
+					natural_beauty: {
+						prompt: "pure natural portrait of beautiful young asian woman, minimal makeup, authentic beauty, genuine smile, casual comfortable outfit, outdoor natural setting, soft daylight, organic mood, real moment captured, professional portrait photography, healthy skin glow, detailed facial features, 8k quality, girl-next-door charm",
+						negative_prompt: "cartoon, anime, drawn, painted, 3d, cgi, fake, artificial, plastic skin, doll, mannequin, unrealistic, blurry, distorted, low quality, text, watermark"
 					}
 				};
 
-				const selectedPrompt = prompts[promptType] || prompts.woman;
+				const selectedPrompt = prompts[promptType] || prompts.elegant_portrait;
 
 				const inputs = {
 					prompt: selectedPrompt.prompt,
@@ -75,7 +100,7 @@ const HTML_FORM = `<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Tạo Ảnh Người Thật</title>
+	<title>AI Profile Photo Generator</title>
 	<style>
 		* {
 			margin: 0;
@@ -89,7 +114,7 @@ const HTML_FORM = `<!DOCTYPE html>
 			padding: 20px;
 		}
 		.container {
-			max-width: 1000px;
+			max-width: 1200px;
 			margin: 0 auto;
 			background: white;
 			border-radius: 20px;
@@ -109,7 +134,7 @@ const HTML_FORM = `<!DOCTYPE html>
 		}
 		.options-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 			gap: 20px;
 			margin-bottom: 30px;
 		}
@@ -144,6 +169,7 @@ const HTML_FORM = `<!DOCTYPE html>
 		.option-desc {
 			font-size: 12px;
 			color: #666;
+			line-height: 1.4;
 		}
 		.generate-btn {
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -226,55 +252,79 @@ const HTML_FORM = `<!DOCTYPE html>
 </head>
 <body>
 	<div class="container">
-		<h1>📸 Tạo Ảnh Người Thật</h1>
-		<p class="subtitle">Chọn kiểu ảnh bạn muốn tạo</p>
+		<h1>✨ AI Profile Photo Generator</h1>
+		<p class="subtitle">Choose your style for stunning social media profile photos</p>
 
 		<div class="options-grid">
-			<div class="option-card selected" onclick="selectType('woman')">
-				<div class="option-icon">👩</div>
-				<div class="option-title">Phụ Nữ Casual</div>
-				<div class="option-desc">Tự nhiên, thân thiện</div>
+			<div class="option-card selected" onclick="selectType('elegant_portrait')">
+				<div class="option-icon">👑</div>
+				<div class="option-title">Elegant Portrait</div>
+				<div class="option-desc">Sophisticated & classy</div>
 			</div>
 
-			<div class="option-card" onclick="selectType('man')">
-				<div class="option-icon">👨</div>
-				<div class="option-title">Nam Giới Casual</div>
-				<div class="option-desc">Thoải mái, năng động</div>
+			<div class="option-card" onclick="selectType('fashion_casual')">
+				<div class="option-icon">👗</div>
+				<div class="option-title">Fashion Casual</div>
+				<div class="option-desc">Trendy & stylish</div>
 			</div>
 
-			<div class="option-card" onclick="selectType('professional_woman')">
-				<div class="option-icon">👩‍💼</div>
-				<div class="option-title">Phụ Nữ Chuyên Nghiệp</div>
-				<div class="option-desc">Văn phòng, lịch sự</div>
+			<div class="option-card" onclick="selectType('lifestyle_influencer')">
+				<div class="option-icon">📸</div>
+				<div class="option-title">Lifestyle Influencer</div>
+				<div class="option-desc">Instagram aesthetic</div>
 			</div>
 
-			<div class="option-card" onclick="selectType('professional_man')">
-				<div class="option-icon">👨‍💼</div>
-				<div class="option-title">Nam Giới Chuyên Nghiệp</div>
-				<div class="option-desc">Công sở, nghiêm túc</div>
+			<div class="option-card" onclick="selectType('beach_goddess')">
+				<div class="option-icon">🌊</div>
+				<div class="option-title">Beach Goddess</div>
+				<div class="option-desc">Summer vacation vibes</div>
 			</div>
 
-			<div class="option-card" onclick="selectType('casual_woman')">
-				<div class="option-icon">☕</div>
-				<div class="option-title">Cafe Portrait (Nữ)</div>
-				<div class="option-desc">Quán cafe, ánh sáng tự nhiên</div>
+			<div class="option-card" onclick="selectType('urban_chic')">
+				<div class="option-icon">🌆</div>
+				<div class="option-title">Urban Chic</div>
+				<div class="option-desc">City lifestyle</div>
 			</div>
 
-			<div class="option-card" onclick="selectType('casual_man')">
-				<div class="option-icon">☕</div>
-				<div class="option-title">Cafe Portrait (Nam)</div>
-				<div class="option-desc">Quán cafe, thoải mái</div>
+			<div class="option-card" onclick="selectType('fitness_active')">
+				<div class="option-icon">💪</div>
+				<div class="option-title">Fitness Active</div>
+				<div class="option-desc">Healthy & energetic</div>
+			</div>
+
+			<div class="option-card" onclick="selectType('vintage_glam')">
+				<div class="option-icon">🎬</div>
+				<div class="option-title">Vintage Glam</div>
+				<div class="option-desc">Old Hollywood style</div>
+			</div>
+
+			<div class="option-card" onclick="selectType('bohemian_free')">
+				<div class="option-icon">🌸</div>
+				<div class="option-title">Bohemian Free</div>
+				<div class="option-desc">Natural & artistic</div>
+			</div>
+
+			<div class="option-card" onclick="selectType('luxury_elegance')">
+				<div class="option-icon">💎</div>
+				<div class="option-title">Luxury Elegance</div>
+				<div class="option-desc">High-end & premium</div>
+			</div>
+
+			<div class="option-card" onclick="selectType('natural_beauty')">
+				<div class="option-icon">🌿</div>
+				<div class="option-title">Natural Beauty</div>
+				<div class="option-desc">Authentic & pure</div>
 			</div>
 		</div>
 
 		<button class="generate-btn" onclick="generateImage()" id="generateBtn">
-			✨ Tạo Ảnh
+			✨ Generate Photo
 		</button>
 
 		<div class="loading" id="loading">
 			<div class="spinner"></div>
-			<p style="color: #667eea; font-weight: 600; font-size: 18px;">Đang tạo ảnh...</p>
-			<p style="color: #999; margin-top: 10px;">Vui lòng đợi 10-20 giây</p>
+			<p style="color: #667eea; font-weight: 600; font-size: 18px;">Creating your photo...</p>
+			<p style="color: #999; margin-top: 10px;">Please wait 10-20 seconds</p>
 		</div>
 
 		<div id="result" class="result"></div>
@@ -283,7 +333,7 @@ const HTML_FORM = `<!DOCTYPE html>
 	</div>
 
 	<script>
-		let selectedType = 'woman';
+		let selectedType = 'elegant_portrait';
 		let generatedImages = [];
 
 		function selectType(type) {
@@ -302,7 +352,7 @@ const HTML_FORM = `<!DOCTYPE html>
 			loading.style.display = 'block';
 			result.innerHTML = '';
 			generateBtn.disabled = true;
-			generateBtn.textContent = '⏳ Đang tạo...';
+			generateBtn.textContent = '⏳ Creating...';
 
 			const formData = new FormData();
 			formData.append('type', selectedType);
@@ -323,12 +373,12 @@ const HTML_FORM = `<!DOCTYPE html>
 					generatedImages.unshift(imageUrl);
 					
 					result.innerHTML = \`
-						<h2 style="color: #333; margin-bottom: 20px;">✨ Ảnh Đã Tạo</h2>
-						<p style="color: #666; margin-bottom: 20px;">Thời gian: \${processingTime}s</p>
-						<img src="\${imageUrl}" alt="Generated">
+						<h2 style="color: #333; margin-bottom: 20px;">✨ Your Photo is Ready!</h2>
+						<p style="color: #666; margin-bottom: 20px;">Processing time: \${processingTime}s</p>
+						<img src="\${imageUrl}" alt="Generated Profile Photo">
 						<br><br>
-						<a href="\${imageUrl}" download="person_\${selectedType}_\${Date.now()}.png" class="download-btn">
-							📥 Tải Xuống
+						<a href="\${imageUrl}" download="profile_\${selectedType}_\${Date.now()}.png" class="download-btn">
+							📥 Download Photo
 						</a>
 					\`;
 
@@ -336,7 +386,7 @@ const HTML_FORM = `<!DOCTYPE html>
 				} else {
 					result.innerHTML = \`
 						<div style="color: #dc3545; padding: 20px;">
-							<h2>❌ Lỗi</h2>
+							<h2>❌ Error</h2>
 							<p>\${await response.text()}</p>
 						</div>
 					\`;
@@ -344,21 +394,21 @@ const HTML_FORM = `<!DOCTYPE html>
 			} catch (error) {
 				result.innerHTML = \`
 					<div style="color: #dc3545; padding: 20px;">
-						<h2>❌ Lỗi</h2>
+						<h2>❌ Error</h2>
 						<p>\${error.message}</p>
 					</div>
 				\`;
 			} finally {
 				loading.style.display = 'none';
 				generateBtn.disabled = false;
-				generateBtn.textContent = '✨ Tạo Ảnh';
+				generateBtn.textContent = '✨ Generate Photo';
 			}
 		}
 
 		function updateGallery() {
 			const gallery = document.getElementById('gallery');
 			if (generatedImages.length > 0) {
-				gallery.innerHTML = '<h3 style="grid-column: 1/-1; color: #333;">Ảnh đã tạo:</h3>' +
+				gallery.innerHTML = '<h3 style="grid-column: 1/-1; color: #333;">Your Gallery:</h3>' +
 					generatedImages.map(url => \`<img src="\${url}" onclick="viewImage('\${url}')">\`).join('');
 			}
 		}
@@ -366,11 +416,11 @@ const HTML_FORM = `<!DOCTYPE html>
 		function viewImage(url) {
 			const result = document.getElementById('result');
 			result.innerHTML = \`
-				<h2 style="color: #333; margin-bottom: 20px;">👁️ Xem Ảnh</h2>
+				<h2 style="color: #333; margin-bottom: 20px;">👁️ View Photo</h2>
 				<img src="\${url}" alt="View">
 				<br><br>
 				<a href="\${url}" download="image.png" class="download-btn">
-					📥 Tải Xuống
+					📥 Download Photo
 				</a>
 			\`;
 			result.scrollIntoView({ behavior: 'smooth' });
